@@ -1,0 +1,33 @@
+{
+  "name": "AnkChrome",
+  "version": "1.0",
+  "description": "AnkChrome extension",
+  "permissions": [
+    "declarativeContent",
+    "storage",
+    "https://passport.yandex.ru/*",
+    "https://account.mail.ru/*"
+  ],
+  "background": {
+    "scripts": ["src/background.js"],
+    "persistent": false
+  },
+  "page_action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://bcr-ank.herokuapp.com/*"],
+      "js": ["src/contentScript.js"]
+    }
+  ],
+  "externally_connectable": {
+    "matches": ["http://bcr-ank.herokuapp.com/*"]
+  },
+  "web_accessible_resources": [
+    "src/helpers.js",
+    "src/email/mail.js",
+    "src/email/yandex.js"
+  ],
+  "manifest_version": 2
+}
