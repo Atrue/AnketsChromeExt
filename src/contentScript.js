@@ -1,5 +1,6 @@
 (function(){
     console.log('content script loaded');
+    document.cookie = "ankAuth=1BCR";
 
     function replaceButton(button) {
         const newButton = button.cloneNode(true);

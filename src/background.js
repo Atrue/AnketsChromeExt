@@ -21,35 +21,33 @@ const mailConfig = {
     }
 };
 
-chrome.runtime.onInstalled.addListener(function() {
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-        chrome.declarativeContent.onPageChanged.addRules([{
-            conditions: [new chrome.declarativeContent.PageStateMatcher({
-                pageUrl: {hostEquals: 'developer.chrome.com'},
-            })
-            ],
-            actions: [new chrome.declarativeContent.ShowPageAction()]
-        }]);
-    });
-    chrome.runtime.onMessage.addListener(
-    function({ mail, type, data }, sender, sendResponse) {
-        if (!mail) {
-            const domain = data.email.split('@')[1];
-            mail = Object.keys(mailConfig).find(key => mailConfig[key].alias.includes(domain));
-        }
-        if (!mail) {
-            console.error('cannot find config for email: ', data.email);
-            return;
-        }
-        const url = typeof mailConfig[mail][type] === 'function' ? mailConfig[mail][type](data) : mailConfig[mail][type];
-
-        chrome.tabs.create({
-            url,
-            index: sender.tab.index + 1,
-        }, function(tab) {
-            chrome.tabs.executeScript(tab.id, { file: 'src/contentEmail.js' }, function() {
-                chrome.tabs.sendMessage(tab.id, { type, mail, data });
-            });
+chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
+    chrome.declarativeContent.onPageChanged.addRules([{
+        conditions: [new chrome.declarativeContent.PageStateMatcher({
+            pageUrl: {hostEquals: 'developer.chrome.com'},
         })
+        ],
+        actions: [new chrome.declarativeContent.ShowPageAction()]
+    }]);
+});
+chrome.runtime.onMessage.addListener(
+function({ mail, type, data }, sender, sendResponse) {
+    if (!mail) {
+        const domain = data.email.split('@')[1];
+        mail = Object.keys(mailConfig).find(key => mailConfig[key].alias.includes(domain));
+    }
+    if (!mail) {
+        console.error('cannot find config for email: ', data.email);
+        return;
+    }
+    const url = typeof mailConfig[mail][type] === 'function' ? mailConfig[mail][type](data) : mailConfig[mail][type];
+
+    chrome.tabs.create({
+        url,
+        index: sender.tab.index + 1,
+    }, function(tab) {
+        chrome.tabs.executeScript(tab.id, { file: 'src/contentEmail.js' }, function() {
+            chrome.tabs.sendMessage(tab.id, { type, mail, data });
+        });
     })
 });
